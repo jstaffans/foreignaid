@@ -20,7 +20,8 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-require('./routes/index.js')(app)
+require('./routes/index.js')(app);
+require('./routes/aid.js')(app);
 
 // Start the app
 

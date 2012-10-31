@@ -1,135 +1,45 @@
-// the dimensions of the full-size image
-var native_width = 3954;
-var native_height = 2470;
 
-var waypoints = [];
+var processAidData = function(data) {
+	var latLonLookup = {'130':['28','3'],'131':['41','20'],'133':['28','17'],'136':['32','-5'],'139':['34','9'],'142':['27','30'],'216':['-29','24'],'225':['-12.5','18.5'],'227':['-22','24'],'228':['-3.5','30'],'229':['6','12'],'230':['16','-24'],'231':['7','21'],'232':['15','19'],'233':['-12.23333','44.44553'],'234':['0','25'],'235':['0','25'],'236':['9.5','2.25'],'237':['15','39'],'238':['8','38'],'239':['-1','11.75'],'240':['13.5','-15.5'],'241':['8.1','-1.2'],'243':['11','-10'],'244':['12','-15'],'245':['1.7','10.5'],'247':['8','-5'],'248':['1','38'],'249':['-29.5','28.25'],'251':['6.5','-9.5'],'252':['-20','47'],'253':['-13.5','34'],'255':['18','-2'],'256':['20','-12'],'257':['-20.3','57.58333'],'259':['-18.25','35'],'260':['18','9'],'261':['10','8'],'265':['-19','29'],'266':['-2','30'],'268':['1','7'],'269':['14','-14'],'270':['-4.58333','55.66667'],'272':['8.5','-11.5'],'273':['6','48'],'274':['11.5','42.5'],'276':[-16,-5.8],'278':['16','30'],'279':['7.5','30'],'280':['-26.5','31.5'],'281':['-22','17'],'282':['-6','35'],'283':['8','1.16667'],'285':['2','33'],'287':['13','-2'],'288':['-15','30'],'318':['12.11667','-61.66667'],'336':['10','-84'],'338':['22','-79.5'],'339':['19','-72.41667'],'340':['19','-70.66667'],'347':['15.5','-90.25'],'351':['15','-86.5'],'352':['17.25','-88.75'],'354':['18.25','-77.5'],'358':['23','-102'],'364':['13','-85'],'365':['9','-80'],'376':[18.2,-63.1],'377':['17.05','-61.8'],'378':['15.5','-61.33333'],'381':['13.83333','-88.91667'],'382':['17.33333','-62.75'],'383':['13.88333','-60.96667'],'384':[13.3,-61.2],'385':[16.7,-62.2],'425':['-34','-64'],'428':['-17','-65'],'431':['-10','-55'],'434':['-30','-71'],'437':['4','-72'],'440':['-2','-77.5'],'446':['5','-59'],'451':['-22.99333','-57.99639'],'454':['-10','-76'],'457':['4','-56'],'460':['-33','-56'],'463':['8','-66'],'521':['48','68'],'525':['40','60'],'532':['-18','178'],'562':['-6','147'],'573':['35','38'],'625':['33','66'],'630':['27.5','90.5'],'635':['22','98'],'640':['7','81'],'645':['20','77'],'655':['3.2','73'],'660':['28','84'],'665':['30','70'],'666':['24','90'],'667':['41.70754','63.84911'],'671':['39','71'],'672':['40','45'],'673':['41','75'],'674':['40.5','47.5'],'728':['13','105'],'730':['35','105'],'738':['-5','120'],'740':['40','127'],'745':['18','105'],'751':['2.5','112.5'],'753':['46','105'],'755':['13','122'],'764':['15','100'],'765':['-8.83333','125.75'],'769':['16.16667','107.83333'],'816':['32','53'],'831':[-21.2,-159.8],'836':['1.421','172.984'],'845':['-0.517','166.933'],'850':['15.5','47.5'],'851':['31','36'],'852':['33.83333','35.83333'],'855':['39.05901','34.91155'],'856':['33','44'],'857':['41.99998','43.4999'],'859':[32.2,35.2],'860':[6.9,158.2],'861':[7.5,134.6],'863':[44.1,17.7],'865':['49','32'],'867':['-8','159'],'868':['8','1.16667'],'870':['-20','-175'],'872':['-8.51719','179.14478'],'873':['47','29'],'876':[-14.4,-178],'880':['-13.8031','-172.17831'],'886':['41.83333','22'],'887':['44.81892','20.45998'],'888':['42.5','19.3'],'890':['53','28'],'891':['-6','147'],'892':['42.58333','21'],'895':[7.1,171.2]};
+	var raw = [];
 
-getDays = function() {
-	$.ajax({
-		url: '/track/days', 
-		dataType: 'json',
-		success: function(data) {
-			$.each(data.days, function(key, day) {
-				$('select#day').append($('<option/>', {value: day.id, text: day.date}));
-			});
+	data.forEach(function(paidToCountry) {
+		if (latLonLookup[paidToCountry._id]) {
+			var lat = latLonLookup[paidToCountry._id][0];
+			var lon = latLonLookup[paidToCountry._id][1];
+			var magnitude = paidToCountry.value.Paid;
+			raw.push(lat);
+			raw.push(lon);
+			raw.push(magnitude);
 		}
 	});
-}
 
-getWaypoints = function() {
-	var id = $('select#day option:selected').val();
-	$.ajax({
-		url: '/track/waypoints/' + id,
-		dataType: 'json',
-		success: function(data) {
-			waypoints = data.waypoints;
-			drawSmallMapWaypoints();
-		}
-	});
+	return [
+		[
+			'all', raw
+		]
+	];
 };
-
-setupDayDropdown = function() {
-	$('select#day').change(function() {
-		getWaypoints();
-	});
-}
-
-setupMagnifyingGlass = function() {
-	$(".magnify").mousemove(function(e) {
-		//x/y coordinates of the mouse
-		//This is the position of .magnify with respect to the document.
-		var magnify_offset = $(this).offset();
-		//We will deduct the positions of .magnify from the mouse positions with
-		//respect to the document to get the mouse positions with respect to the 
-		//container(.magnify)
-		var mx = e.pageX - magnify_offset.left;
-		var my = e.pageY - magnify_offset.top;
-	
-		//Finally the code to fade out the glass if the mouse is outside the container
-		if(mx < $(this).width() && my < $(this).height() && mx > 0 && my > 0)
-		{
-			$("div.large").fadeIn(100);
-		}
-		else
-		{
-			$("div.large").fadeOut(100);
-		}
-		if($("div.large").is(":visible"))
-		{
-			//The background position of .large will be changed according to the position
-			//of the mouse over the .small image. So we will get the ratio of the pixel
-			//under the mouse pointer with respect to the image and use that to position the 
-			//large image inside the magnifying glass
-
-			var rx = Math.round(mx/$(".small").width()*native_width - $("div.large").width()/2)*-1;
-			var ry = Math.round(my/$(".small").height()*native_height - $("div.large").height()/2)*-1;
-			var bgp = rx + "px " + ry + "px";
-			
-			//Time to move the magnifying glass with the mouse
-			var px = mx - $("div.large").width()/2;
-			var py = my - $("div.large").height()/2;
-			//Now the glass moves with the mouse
-			//The logic is to deduct half of the glass's width and height from the 
-			//mouse coordinates to place it with its center at the mouse coordinates
-			
-			//If you hover on the image now, you should see the magnifying glass in action
-			$("div.large").css({left: px, top: py, backgroundPosition: bgp});
-      
-			$('div.info').text("rx: " + rx + ", ry: " + ry);
-
-			drawMagnifiedWaypoints(rx, ry);
-		}
-	});
-};
-
-drawMagnifiedWaypoints = function(rx, ry) {
-	var scale_x = 1.5; 
-	var scale_y = 0.75;
-
-	$('#routeCanvas').clearCanvas({
-		x: 0, y: 0,
-		width: native_width, height: native_height
-	});
-
-	$.each(waypoints, function(i, waypoint) {
-		$("#routeCanvas").drawPolygon({
-			strokeStyle: "#0f0",
-			strokeWidth: 10,
-			x: scale_x * (waypoint.x + rx), y: scale_y * (waypoint.y + ry),
-			radius: 8,
-			sides: 3
-		});	
-	});
-};
-
-drawSmallMapWaypoints = function() {
-	var originX = 1147;
-	var originY = 22;
-
-	$('#smallRouteCanvas').clearCanvas({
-		x: 0, y: 0,
-		width: 1280, height: 800
-	});
-
-	$.each(waypoints, function(i, waypoint) {
-		console.log(waypoint);
-		$("#smallRouteCanvas").drawPolygon({
-			strokeStyle: "#0f0",
-			strokeWidth: 8,
-			x: originX + waypoint.x, y: originY + waypoint.y,
-			radius: 6,
-			sides: 3
-		});	
-	});
-}
-
-$('body').waitForImages(function() {
-  $('.loader').hide();
-	$('.fade').fadeIn(2000, function() {});  
-});
 
 $(document).ready(function() {
-	getDays();
-	setupMagnifyingGlass();	
-	setupDayDropdown();
+	if(!Detector.webgl){
+		Detector.addGetWebGLMessage();
+    } else {	
+		var container = document.getElementById('container');
+		var globe = new DAT.Globe(container);
+
+		$.ajax({
+			url: '/aid/2006',
+			dataType: 'json',
+			success: function(data) {
+				data = processAidData(data);
+			    window.data = data;
+			    for (i=0;i<data.length;i++) {
+			    	globe.addData(data[i][1], {format: 'magnitude', name: data[i][0], animated: false});
+			    }
+			    globe.createPoints();
+			    globe.animate();
+			}
+		});
+	}
 });

@@ -1,6 +1,5 @@
-var databaseUrl =  "mongodb://johannes:johannes4Aid@ds039457.mongolab.com:39457/foreign_aid";
-var collections = ["countries", "events"];
-var db = require("mongojs").connect(databaseUrl, collections);
+var config = require("../config.js");
+var db = require("mongojs").connect(config.mongoUrl, ["countries", "events"]);
 
 var map = function() {
 	emit(this.Country, {
@@ -29,7 +28,7 @@ module.exports.getAidForYear = function(year, resultsCallback) {
 			query: {"Year": year, "Country": {$nin: [998, 798, 862]}}
 		}, 
 		function(err, result) {
-			// normalize data
+			// normalize data to [0.0, 1.0] range
 			var max = 0;
 
 			result.forEach(function(result) {

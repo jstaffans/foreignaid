@@ -14,12 +14,40 @@ var processAidData = function(data) {
 		}
 	});
 
+	/*
 	return [
 		[
-			'all', raw
+			year, raw
 		]
 	];
+	*/
+
+	return raw;
 };
+
+var years = ['2006', '2007', '2008'];
+
+var setTime = function (globe, t) {
+    return function () {
+    	console.log(t);
+        new TWEEN.Tween(globe).to({
+            time: t / years.length
+        }, 500).easing(TWEEN.Easing.Cubic.EaseOut).start();
+        var y = document.getElementById('year' + years[t]);
+        
+        if (y.getAttribute('class') === 'year selected') {
+            return;
+        }
+        
+        var yy = document.getElementsByClassName('year');
+        for (i = 0; i < yy.length; i++) {
+            yy[i].setAttribute('class', 'year');
+        }
+        
+        y.setAttribute('class', 'year selected');
+    };
+};
+
 
 $(document).ready(function() {
 	if(!Detector.webgl){
@@ -27,19 +55,38 @@ $(document).ready(function() {
     } else {	
 		var container = document.getElementById('container');
 		var globe = new DAT.Globe(container);
+		TWEEN.start();
 
-		$.ajax({
-			url: '/aid/2006',
-			dataType: 'json',
-			success: function(data) {
-				data = processAidData(data);
-			    window.data = data;
-			    for (i=0;i<data.length;i++) {
-			    	globe.addData(data[i][1], {format: 'magnitude', name: data[i][0], animated: false});
-			    }
-			    globe.createPoints();
-			    globe.animate();
-			}
+		var data = [];
+
+		years.forEach(function(year) {
+			console.log(year);
+			$.ajax({
+				url: '/aid/' + year,
+				dataType: 'json',
+				async: false,
+				success: function(dataForYear) {
+					var raw = processAidData(dataForYear);
+					data.push([year, raw]);
+				}
+			});
 		});
+
+		console.log(data);
+
+	    window.data = data;
+	    for (i=0;i<data.length;i++) {
+	    	globe.addData(data[i][1], {format: 'magnitude', name: data[i][0], animated: true});
+	    }
+
+	    globe.createPoints();
+	    setTime(globe, 0)();
+	    globe.animate();
+
+		for (var i = 0; i < years.length; i++) {
+			console.log("year" + years[i]);
+	        var y = $('#year' + years[i]);
+	        y.click(function(event) {setTime(globe, i)()});
+	    }
 	}
 });

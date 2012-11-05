@@ -2,10 +2,13 @@ extends layout
 
 block content
 	div(id='container')
-	div(id='table')
-		h2 Finnish Direct Foreign Aid
-		div(class='year') 
-			span(class='selected') 2006 
-			span | 2007 | 2008 
-		p The globe shows aid that was channeled directly to a recipient country. It does not include funds channeled through organizations such as the United Nations and the European Union.
-		div(class='table') (Top ten recipients in table format here)
+	h2 Finnish Direct Foreign Aid
+	div(class='year') 
+		span(class='year selected', id='year2006') 2006
+		span  | 
+		span(class='year', id='year2007') 2007
+		span  | 
+		span(class='year', id='year2008') 2008
+	p(id='info') The globe shows aid that was channeled directly to a recipient country. It does not include funds channeled through organizations such as the United Nations and the European Union.
+
+	p(id='tableInfo') (Top ten recipients in table format here)

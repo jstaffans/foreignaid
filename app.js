@@ -23,13 +23,8 @@ app.configure('development', function(){
 require('./routes/index.js')(app);
 require('./routes/aid.js')(app);
 
-var port = process.env.PORT || 5000;
+var port = process.env.PORT || 3000;
 app.listen(port, function() {
   console.log("Listening on " + port);
 });
 
-// Start the app
-
-//http.createServer(app).listen(app.get('port'), function(){
-//  console.log("Express server listening on port " + app.get('port'));
-//});
